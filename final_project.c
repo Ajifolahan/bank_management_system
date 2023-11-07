@@ -37,7 +37,7 @@ Design a clear and concise main menu to navigate between Users and Admin.
 
 int main(void){
     int choice;
-    puts("Welcome to k Management System. Please select from the following options:\n");
+    puts("Welcome to k Manam. Please select from the following options:\n");
     puts("Please enter an integer value to represent your choice:\n");
     puts("1. User\n");
     puts("2. Admin\n");
