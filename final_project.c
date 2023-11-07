@@ -28,11 +28,16 @@ Design a clear and concise main menu to navigate between Users and Admin.
 
 */
 
+//git pull origin master
+//git add .
+//git commit -m "Added main menu"
+//git push origin master
+
 #include <stdio.h>
 
 int main(void){
     int choice;
-    puts("Welcome to the Bank Management System. Please select from the following options:\n");
+    puts("Welcome to k Management System. Please select from the following options:\n");
     puts("Please enter an integer value to represent your choice:\n");
     puts("1. User\n");
     puts("2. Admin\n");
