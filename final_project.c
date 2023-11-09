@@ -4,6 +4,7 @@
 //git push origin master
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <conio.h>
 #include <windows.h>
 
@@ -41,7 +42,7 @@ int add_customer(){
 
     //checking for exisiting customer
     char check_path[200];
-    snprintf(check_path, sizeof(check_path), "C:/Users/misti/OneDrive/Desktop/Final Project/bank_management_system/customers/%s%s.txt", first, last);
+    snprintf(check_path, sizeof(check_path), "Customers/%s%s.txt", first, last);
     FILE * errorcheck = fopen(check_path, "r");
 
     if(errorcheck != NULL) // if it doesn't return null(or that there is no file), that means the customer exists
@@ -51,7 +52,7 @@ int add_customer(){
     
     //creating user file
         char file_path[200];        
-        snprintf(file_path, sizeof(file_path), "C:/Users/misti/OneDrive/Desktop/Final Project/bank_management_system/customers/%s%s.txt", first, last);
+        snprintf(file_path, sizeof(file_path), "Customers/%s%s.txt", first, last);
         FILE * fpointer = fopen(file_path, "w"); //opening file (use a to append just in case of overwrite)
 
         //writing info in their file
@@ -67,7 +68,7 @@ int view_customers(){
     // search for file 
     //snprintf to concatinate any username to the file path so long as it exists
     char file_path[200];        
-    snprintf(file_path, sizeof(file_path), "C:/Users/misti/OneDrive/Desktop/Final Project/bank_management_system/customers/%s.txt", customer);
+    snprintf(file_path, sizeof(file_path), "Customers/%s.txt", customer);
  
     // open the file
     FILE * fpointer = fopen(file_path, "r");  
@@ -113,64 +114,115 @@ int view_customers(){
 void admin_login(){
     char password[20];
     char username[20];
-    printf("Welcome to the Admin portal. Please sign in:\n");  //Admin login shortened
+    printf("Welcome to the Admin portal. Please sign in:\n");  
     printf("Username: ");
     scanf("%s", username);
     printf("Password: ");
     scanf("%s", password);
 
-
-    int choice; 
-    puts("Please choose what you want to do today. Please enter an integer value to represent your choice.\n");
-    puts("1. View Customer Info  2. Add Customers  3. Remove Customers  4. Sort");  // put on one line for easier reading(for us and users)
-    scanf("%d", &choice);
-
-
-        // prompt admin user for action
-        switch(choice){     // removed delete case(put it in view customer option)
-        case 1:
-            view_customers();
-            break;
-        case 2:
-            add_customer();
-            break;
-        case 3:
-            puts("sorting");
-            break;
-        default:
-            puts("Invalid choice");
-            break;
+    FILE *file = fopen("logins.txt", "r");
+    if (file == NULL) {
+        puts("Error opening file");
+        return;
     }
-    } 
+
+    char fileUsername[20];
+    char filePassword[20];
+    bool found = false;
+
+    while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
+        if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0) {
+             if (strstr(fileUsername, "-adm") != NULL) {
+                puts("Admin Login Successful");
+                found = true;
+            } else {
+                puts("Error. You cannot sign into the admin portal with a Users login information. Please try again");
+            }
+            break;
+        } else {
+            puts("Invalid login.Please enter the correct login information");
+        }
+    }
+
+    fclose(file);
+
+    if (found) {
+        int choice; 
+        puts("Please choose what you want to do today. Please enter an integer value to represent your choice.");
+        puts("1. View Customer Info  2. Add Customers  3. Remove Customers  4. Sort");
+        scanf("%d", &choice);
+
+
+            // prompt admin user for action
+            switch(choice){   
+            case 1:
+                view_customers();
+                break;
+            case 2:
+                add_customer();
+                break;
+            case 3:
+                puts("sorting");
+                break;
+            default:
+                puts("Invalid choice");
+                break;
+        }
+    }
+} 
 
 void user_login(){
     char password[20];
     char username[20]; 
-    printf("Welcome to the User portal. Please sign in:\n");   //User Login shortened
+    printf("Welcome to the User portal. Please sign in:\n");  
     printf("Username: ");
     scanf("%s", username);
     printf("Password: ");
     scanf("%s", password);
 
+    FILE *file = fopen("Customers/logins.txt", "r");
+    if (file == NULL) {
+        puts("Error opening file");
+        return;
+    }
 
-    int choice; //User selection
-    puts("Please choose what you want to do today?. Please enter an integer value to represent your choice.\n");
-    puts("1. Withdraw  2. Deposit  3. View previous transactions");    // put on one pine for easier reading(for us and users)
-    scanf("%d", &choice);
+    char fileUsername[20];
+    char filePassword[20];
+    bool found = false;
 
-        switch(choice){
-        case 1:
-            puts("Withdrawing");
+    // Read each line from the file and compare the login info
+    while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
+        if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0) {
+            puts("Login Successful");
+            found = true;
             break;
-        case 2:
-            puts("Depositing");
-            break;
-        case 3:
-            puts("Viewing previous transactions");
-            break;
-        default:
-            puts("Invalid choice");
-            break;
+        } else {
+            puts("Invalid login.Please enter the correct login information");
+        }
+    }
+
+    fclose(file);
+
+    if(found){
+        int choice; //User selection
+        puts("Please choose what you want to do today?. Please enter an integer value to represent your choice.\n");
+        puts("1. Withdraw  2. Deposit  3. View previous transactions"); 
+        scanf("%d", &choice);
+
+            switch(choice){
+            case 1:
+                puts("Withdrawing");
+                break;
+            case 2:
+                puts("Depositing");
+                break;
+            case 3:
+                puts("Viewing previous transactions");
+                break;
+            default:
+                puts("Invalid choice");
+                break;
+        }
     }
 
 }
@@ -178,7 +230,7 @@ void user_login(){
 
 int main(void){
     int choice;
-    puts("Welcome to the Bank Management System. Please enter an integer value to represent your choice:"); // shortened main menu
+    puts("Welcome to the Bank Management System. Please enter an integer value to represent your choice:");
     puts("1. User Portal  2. Admin Portal");
     scanf("%d", &choice);
 

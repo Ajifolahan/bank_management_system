@@ -1,9 +1,0 @@
-First Name: Maya
-Last Name: Pugh
-
-Username: mayamp4
-Password: maymay
-
-Balance: $10421.00
-
-Transaction History: 
