@@ -97,15 +97,13 @@ int view_customers()
     FILE *fpointer = fopen(file_path, "r");
 
     // check if exists
-    if (fpointer == NULL)
-    {
+    if (fpointer == NULL) {
         printf("Customer does not exist. Please check your spelling and try again.\n");
     }
 
     // output user info
     char data[100];
-    while (fgets(data, 100, fpointer))
-    {
+    while (fgets(data, 100, fpointer)) {
         printf("%s", data);
     }
 
@@ -113,32 +111,24 @@ int view_customers()
 
     // admin action choices
     int action;
-    do
-    {
+    do {
         printf("\nActions:  1. Edit Client Information  2. Archive Client  3. Back\n"); // ask admin what they want to do with the user
         scanf("%d", &action);
 
         int arc; // for archive warning
-        switch (action)
-        {
+        switch (action) {
         case 1:
             puts("Editing Client");
             break;
         case 2: // if they archive, make them verify; do while to prevent infinite loop
-            do
-            {
+            do {
                 puts("Are you sure you want to archive this customer? 1. Yes  2. No");
                 scanf("%d", &arc);
-                if (arc == 1)
-                {
+                if (arc == 1) {
                     archive_customer(file_path);
-                }
-                else if (arc == 2)
-                {
+                } else if (arc == 2) {
                     continue;
-                }
-                else
-                {
+                } else {
                     printf("Invalid input, please try again.\n");
                 }
             } while (arc != 1 && arc != 2);
@@ -154,8 +144,7 @@ int view_customers()
     return 0;
 } // end of view customer
 
-void user_withdrawing(char username[20])
-{
+void user_withdrawing(char username[20]) {
     FILE *file = fopen("Customers/customer_info.txt", "r");
     FILE *temp = fopen("Customers/customer_info_temp.txt", "w");
 
@@ -218,77 +207,77 @@ void user_withdrawing(char username[20])
     }
 }
 
-void admin_login()
-{
-    char password[20], username[20];                                        // added to one line
-    printf("Welcome to the Admin portal. Please sign in:\nUsername: "); // merged sussesive print statements
-    scanf("%s", username);
-    printf("\nPassword: ");
-    scanf("%s", password);
-
-    FILE *file = fopen("Customers/logins.txt", "r"); // added the "Customers/" to specify path
-    if (file == NULL)
-    {
+void admin_login() {
+    char password[20], username[20];   
+    FILE *file = fopen("Customers/logins.txt", "r");
+    if (file == NULL) {
         puts("Error opening file");
         return;
-    }
+    }  
+
+    puts("Welcome to the Admin portal. Please sign in: ");
+
+     do {
+        printf("Username: ");
+        scanf("%s", username);
+        if (strcmp(username, "exit") == 0) {
+            exit(0);
+        }
+        if (strstr(username, "-adm") == NULL) {
+            puts("Error. You cannot sign into the user portal with an admin login information. Please try again or type 'exit' to exit");
+        }
+    } while (strstr(username, "-adm") == NULL);
+    printf("Password: ");
+    scanf("%s", password);
 
     char fileUsername[20], filePassword[20];
     bool found = false;
 
-    while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF)
-    {
+    while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
         if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0) {
-            if (strstr(fileUsername, "-adm") != NULL) {
-                puts("Admin Login Successful\n");
+                puts("Admin Login Successful");
                 found = true;
-            }
-            else {
-                puts("Error. You cannot sign into the admin portal with a Users login information. Please try again");
-            }
-            break;
+                break;
         }
     }
 
-    if (!found)
-    {
-        puts("Invalid login. Please enter the correct login information");
-    }
-
-    fclose(file);
-
-    if (found)
-    {
+    if (!found) {
+        puts("Invalid login. You've been exited from the bank");
+        exit(0);    
+    } else {
         int choice;
-        while (1)
-        {
-            puts("\nPlease choose what you want to do today. Please enter an integer value to represent your choice.\n\n1. View Customer Info  2. Add Customers  3. Sort  4. Logout");
-            scanf("%d", &choice); // mereged puts^
+            puts("Please choose what you want to do today. Please enter an integer value to represent your choice.\n\n1. View Customer Info  2. Add Customers  3. Sort  4. Logout");
 
-            // prompt admin user for action
-            switch (choice)
-            {
-            case 1:
-                view_customers();
-                break;
-            case 2:
-                add_customer();
-                break;
-            case 3:
-                puts("sorting");
-                break;
-            case 4:
-                puts("\n\nYou have been logged out\n\n");
-                return;
-            default:
-                puts("Invalid choice");
-                break;
+        do {
+            if (scanf("%d", &choice) == 1) {
+            // Process the choice
+                if (choice == 1) {
+                    view_customers();
+                    break;
+                } else if (choice == 2) {
+                    add_customer();
+                    break;
+                } else if (choice == 3) {
+                    puts("Sorting");
+                    exit(0);
+                } else if (choice == 4) {
+                    puts("You have been logged out");
+                    exit(0);
+                } else {
+                puts("Invalid input, try again");
+                }
+            } else {
+            // Clear the input buffer
+            int c;
+            puts("Invalid input, try again");
+            while ((c = getchar()) != '\n' && c != EOF);
             }
-        }
+        } while (1);
     }
+    fclose(file);
 }
 
-//invalid character, exit option,
+//invalid login option
 void user_login() {
     char password[20], username[20];
     FILE *file = fopen("Customers/logins.txt", "r");
@@ -325,33 +314,37 @@ void user_login() {
     }
 
     if (!found) {
-        puts("Invalid login. Please enter the correct login information");
-        // printf("Username: ");
-        // scanf("%s", username);
-        // printf("Password: ");
-        // scanf("%s", password);
+        puts("Invalid login. You've been exited from the bank");
+        exit(0);
     } else {
         int choice; // User selection
         puts("Welcome! Please enter an integer value to represent your input.\n1. Withdraw  2. Deposit  3. View previous transactions  4. Logout");
-        scanf("%d", &choice);
-
-        switch (choice) {
-        case 1:
-            user_withdrawing(username);
-            break;
-        case 2:
-            puts("Depositing");
-            exit(0);
-        case 3:
-            puts("Viewing previous transactions");
-            exit(0);
-        case 4:
-            puts("You have been logged out");
-            exit(0);
-        default:
-            puts("Invalid choice");
-            exit(0);
-        }
+    
+        do {
+            if (scanf("%d", &choice) == 1) {
+            // Process the choice
+                if (choice == 1) {
+                    user_withdrawing(username);
+                    break;
+                } else if (choice == 2) {
+                    puts("Depositing");
+                    exit(0);
+                } else if (choice == 3) {
+                    puts("Viewing previous transactions");
+                    exit(0);
+                } else if (choice == 4) {
+                    puts("You have been logged out");
+                    exit(0);
+                } else {
+                puts("Invalid input, try again");
+                }
+            } else {
+            // Clear the input buffer
+            int c;
+            puts("Invalid input, try again");
+            while ((c = getchar()) != '\n' && c != EOF);
+            }
+        } while (1);
     }
     fclose(file);
 }
