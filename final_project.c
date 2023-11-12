@@ -10,6 +10,7 @@
 
 void user_login();
 void admin_login();
+void user_withdrawing();
 
 int archive_customer(const char* filename){
     // search name of file 
@@ -108,7 +109,56 @@ int view_customers(){
         }}while(action != 3);
     }//end of view customer
 
+void user_withdrawing(char username[20]){
+FILE *file = fopen("Customers/customer_info.txt", "r");
+FILE *temp = fopen("Customers/customer_info_temp.txt", "w");
 
+if (file == NULL || temp == NULL) {
+    puts("Error opening file");
+    if (file != NULL) fclose(file);
+    if (temp != NULL) fclose(temp);
+    return;
+}
+
+char fullname[100];
+char fileUsername[20];
+float balance = 0;
+bool found = false;
+
+while (fscanf(file, "%s %s %f", fullname, fileUsername, &balance) != EOF) {
+    if (strcmp(username, fileUsername) == 0) {
+        found = true;
+        float amount;
+        printf("Enter the amount you would like to withdraw: ");
+        scanf("%f", &amount);
+        if (amount > balance) {
+            printf("Insufficient balance. Your current balance is %.2f\n", balance);
+        } else {
+            balance -= amount;
+            printf("Withdrawn %.2f. Your new balance is %.2f\n", amount, balance);
+        }
+    }
+    fprintf(temp, "%s %s %.2f\n", fullname, fileUsername, balance); // Write all lines to temp file
+}
+
+fclose(file);
+fclose(temp);
+
+if(!found){
+    puts("Your account information has not been added into our database");
+} else {
+    // Copy the temp file to the original file
+    file = fopen("Customers/customer_info.txt", "w");
+    temp = fopen("Customers/customer_info_temp.txt", "r");
+
+    while (fscanf(temp, "%s %s %f", fullname, fileUsername, &balance) != EOF) {
+        fprintf(file, "%s %s %.2f\n", fullname, fileUsername, balance);
+    }
+
+    fclose(file);
+    fclose(temp);
+}
+}
 
 
 void admin_login(){
@@ -139,9 +189,11 @@ void admin_login(){
                 puts("Error. You cannot sign into the admin portal with a Users login information. Please try again");
             }
             break;
-        } else {
-            puts("Invalid login.Please enter the correct login information");
         }
+    }
+
+    if (!found) {
+        puts("Invalid login. Please enter the correct login information");
     }
 
     fclose(file);
@@ -190,16 +242,19 @@ void user_login(){
     char filePassword[20];
     bool found = false;
 
+
     // Read each line from the file and compare the login info
     while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
         if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0) {
             puts("Login Successful");
             found = true;
             break;
-        } else {
-            puts("Invalid login.Please enter the correct login information");
-        }
+        } 
     }
+
+    if (!found) {
+    puts("Invalid login. Please enter the correct login information");
+}
 
     fclose(file);
 
@@ -211,7 +266,7 @@ void user_login(){
 
             switch(choice){
             case 1:
-                puts("Withdrawing");
+                user_withdrawing(username);
                 break;
             case 2:
                 puts("Depositing");
