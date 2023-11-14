@@ -27,12 +27,14 @@ int archive_customer(const char *filename)
 
 int add_customer()
 {
-    char first[20], last[20], usern[20], pass[20]; // shortened to initialize on one line
+    char first[20], last[20], usern[20], pass[20], dob[20], acctnum[20], limit[20]; // shortened to initialize on one line
     float deposit;
     printf("Customer Registration\nCustomer First Name: "); // merged successive print statements
     scanf("%s", first);
     printf("Customer Last Name: ");
     scanf("%s", last);
+    printf("Date of Birth (MM/DD/YY): ");
+    scanf("%s", dob);
     printf("Customer Username: ");
     scanf("%s", usern);
     printf("Customer Password: ");
@@ -209,7 +211,7 @@ void user_withdrawing(char username[20]) {
 
 void admin_login() {
     char password[20], username[20];   
-    FILE *file = fopen("Customers/logins.txt", "r");
+    FILE *file = fopen("admins/alogins.txt", "r");
     if (file == NULL) {
         puts("Error opening file");
         return;
@@ -245,10 +247,10 @@ void admin_login() {
         puts("Invalid login. You've been exited from the bank");
         exit(0);    
     } else {
-        int choice;
+        do {int choice;
             puts("Please choose what you want to do today. Please enter an integer value to represent your choice.\n\n1. View Customer Info  2. Add Customers  3. Sort  4. Logout");
 
-        do {
+        
             if (scanf("%d", &choice) == 1) {
             // Process the choice
                 if (choice == 1) {
@@ -280,7 +282,7 @@ void admin_login() {
 //invalid login option
 void user_login() {
     char password[20], username[20];
-    FILE *file = fopen("Customers/logins.txt", "r");
+    FILE *file = fopen("Customers/clogins.txt", "r");
     if (file == NULL) {
         puts("Error opening file");
         return;

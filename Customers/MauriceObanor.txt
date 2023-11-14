@@ -1,7 +1,7 @@
-First Name: Shaniah
-Last Name: Black
+First Name: Maurice
+Last Name: Obanor
 
-Username: shxniah
+Username: mo587
 Password: password
 
 Balance: $1000.00
