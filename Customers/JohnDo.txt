@@ -1,9 +1,0 @@
-First Name: John
-Last Name: Do
-
-Username: w
-Password: w
-
-Balance: $1.00
-
-Transaction History: 

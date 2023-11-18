@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -27,12 +28,14 @@ int archive_customer(const char *filename)
 
 int add_customer()
 {
-    char first[20], last[20], usern[20], pass[20]; // shortened to initialize on one line
+    char first[20], last[20], usern[20], pass[20], dob[20], acctnum[20], limit[20]; // shortened to initialize on one line
     float deposit;
     printf("Customer Registration\nCustomer First Name: "); // merged successive print statements
     scanf("%s", first);
     printf("Customer Last Name: ");
     scanf("%s", last);
+    printf("Date of Birth (MM/DD/YY): ");
+    scanf("%s", dob);
     printf("Customer Username: ");
     scanf("%s", usern);
     printf("Customer Password: ");
@@ -210,7 +213,7 @@ void user_withdrawing(char username[20]) {
 
 void admin_login() {
     char password[20], username[20];   
-    FILE *file = fopen("Customers/logins.txt", "r");
+    FILE *file = fopen("admins/alogins.txt", "r");
     if (file == NULL) {
         puts("Error opening file");
         return;
@@ -246,10 +249,10 @@ void admin_login() {
         puts("Invalid login. You've been exited from the bank");
         exit(0);    
     } else {
-        int choice;
+        do {int choice;
             puts("Please choose what you want to do today. Please enter an integer value to represent your choice.\n\n1. View Customer Info  2. Add Customers  3. Sort  4. Logout");
 
-        do {
+        
             if (scanf("%d", &choice) == 1) {
             // Process the choice
                 if (choice == 1) {
@@ -278,10 +281,53 @@ void admin_login() {
     fclose(file);
 }
 
+// Function to search for a username in a customer file
+char* searchForUsername(char folderPath[], char username[]) {
+    DIR *dir;
+    struct dirent *ent;
+    char *foundFilename = NULL;
+
+    if ((dir = opendir(folderPath)) != NULL) {
+        while ((ent = readdir(dir)) != NULL) {
+            if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+                continue;
+            }
+            char filePath[100];
+            snprintf(filePath, sizeof(filePath), "%s/%s", folderPath, ent->d_name);
+            FILE *file = fopen(filePath, "r");
+            if (file != NULL) {
+                char line[100];
+                int lineCount = 0;
+                // Read each line in the file
+                while (fgets(line, sizeof(line), file) != NULL) {
+                    lineCount++;
+                    // Check if the line contains "Username:" followed by the target username
+                    if (lineCount == 4 && strstr(line, "Username:") != NULL && strstr(line, username) != NULL) {
+                        fclose(file);
+                        closedir(dir);
+                        // Allocate memory for the filename
+                        foundFilename = malloc(strlen(ent->d_name) + 1);
+                        strcpy(foundFilename, ent->d_name);
+
+                        return foundFilename;
+                    }
+                }
+                fclose(file);
+            }
+        }
+        closedir(dir);
+    } else {
+        puts("Error opening directory");
+    }
+    return foundFilename;
+}
+
 //invalid login option
 void user_login() {
-    char password[20], username[20];
-    FILE *file = fopen("Customers/logins.txt", "r");
+    char password[20], username[20], fileUsername[20], filePassword[20];
+    bool found = false;
+
+    FILE *file = fopen("Customers/clogins.txt", "r");
     if (file == NULL) {
         puts("Error opening file");
         return;
@@ -289,43 +335,49 @@ void user_login() {
 
     puts("Welcome to the User portal. Please sign in");
 
-    do {
+    while (!found){
         printf("Username: ");
         scanf("%s", username);
+        if (strcmp(username, "exit") != 0) {
+            printf("Password: ");
+            scanf("%s", password);
+        }
         if (strcmp(username, "exit") == 0) {
+            puts("You have been exited from the bank");
             exit(0);
         }
         if (strstr(username, "-adm") != NULL) {
             puts("Error. You cannot sign into the user portal with an admin login information. Please try again or type 'exit' to exit");
         }
-    } while (strstr(username, "-adm") != NULL);
-    printf("Password: ");
-    scanf("%s", password);
 
-    char fileUsername[20], filePassword[20];
-    bool found = false;
+           // Read each line from the file and compare the login info
+        while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
+            if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0) {
+                puts("User Login Successful");
+                found = true;
+                break;
+            }
+        }
 
-    // Read each line from the file and compare the login info
-    while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
-        if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0) {
-            puts("User Login Successful");
-            found = true;
-            break;
+        if (!found && strstr(username, "-adm") == NULL) {
+            puts("Invalid login. Please try again or type 'exit' to exit");
+            fseek(file, 0, SEEK_SET); ///return the file pointer to the beginning of the file
+
         }
     }
-
-    if (!found) {
-        puts("Invalid login. You've been exited from the bank");
-        exit(0);
-    } else {
+  
+    if (found){
         int choice; // User selection
+        char *foundFilename = searchForUsername("Customers", username);
+
+        if (foundFilename != NULL) {
         puts("Welcome! Please enter an integer value to represent your input.\n1. Withdraw  2. Deposit  3. View previous transactions  4. Logout");
-    
-        do {
+        // printf("Found username in file: %s\n", foundFilename); // Debugging
+          do {
             if (scanf("%d", &choice) == 1) {
             // Process the choice
                 if (choice == 1) {
-                    user_withdrawing(username);
+                    user_withdrawing(foundFilename);
                     break;
                 } else if (choice == 2) {
                     puts("Depositing");
@@ -346,6 +398,12 @@ void user_login() {
             while ((c = getchar()) != '\n' && c != EOF);
             }
         } while (1);
+
+        } else {
+        printf("At this time, we do not have the details of your account\n");
+        puts("Please contact our customer service for further assistance");
+        exit(0);
+        }
     }
     fclose(file);
 }
@@ -377,15 +435,3 @@ int main(void) { //,main menu
 
     return 0;
 }
-
-/* switch(choice){
-    case 1:
-        user_login();
-        break;
-    case 2:
-        admin_login();
-        break;
-    default:
-        puts("Invalid choice");
-        break;
-}*/// left in case of any bug i come across from the if statement
