@@ -4,6 +4,9 @@ Last Name: Obanor
 Username: mo587
 Password: password
 
-Balance: $1000.00
+Balance: $2400.00
 
-Transaction History: 
+Transaction History:
+Withdrew 50.00, new balance is 2200.00
+Withdrew 300.00, new balance is 1900.00
+Deposited 500.00, new balance is 2400.00

@@ -11,7 +11,7 @@
 
 void user_login();
 void admin_login();
-void user_withdrawing();
+void user_banking();
 
 int archive_customer(const char *filename)
 {
@@ -147,9 +147,11 @@ int view_customers()
     return 0;
 } // end of view customer
 
-void user_withdrawing(char username[20]) {
-    FILE *file = fopen("Customers/customer_info.txt", "r");
-    FILE *temp = fopen("Customers/customer_info_temp.txt", "w");
+void user_banking(char filename[200]) {
+    char filepath[200], line[256];
+    snprintf(filepath, sizeof(filepath), "Customers/%s", filename);    // Use snprintf to concatenate the parameter to the file name
+    FILE *file = fopen(filepath, "r");
+    FILE *temp = fopen("Temp_folder/withdrawal_balance.txt", "w");
 
     if (file == NULL || temp == NULL)
     {
@@ -160,55 +162,78 @@ void user_withdrawing(char username[20]) {
             fclose(temp);
         return;
     }
-
-    char fullname[100];
-    char fileUsername[20];
     float balance = 0;
-    bool found = false;
+    float amount;
+    bool balanceUpdated = false;
+    int banking_choice;
 
-    puts("Welcome to the Withdrawal section");
-    while (fscanf(file, "%s %s %f", fullname, fileUsername, &balance) != EOF)
-    {
-        if (strcmp(username, fileUsername) == 0)
-        {
-            found = true;
-            float amount;
-            printf("Enter the amount you would like to withdraw: ");
-            scanf("%f", &amount);
-            if (amount > balance)
-            {
-                printf("Insufficient balance. Your current balance is %.2f\n", balance);
+    puts("Welcome to the Banking Portal");
+    printf("Please enter an integer value to represent your choice. 1. Withdraw  2. Deposit  3. Exit\n");
+    scanf("%d", &banking_choice);
+    while (fgets(line, sizeof(line), file) != NULL) {
+        if (strstr(line, "Balance:") != NULL) {         // Check if the line contains "Balance:"
+            if (sscanf(line, "Balance: $%f", &balance) == 1) { //found the balance value
+                bool validchoice = false;
+                while (!validchoice) {
+                    if (banking_choice == 1) {
+                        printf("Enter the amount you would like to withdraw: ");
+                        scanf("%f", &amount);
+                        if (amount > balance) {
+                            printf("Insufficient balance. Your current balance is %.2f\n", balance);
+                            exit(0);
+                        } else {
+                            balance -= amount;
+                            printf("Withdrawn %.2f. Your new balance is %.2f\n", amount, balance);
+                            balanceUpdated = true;
+                            fprintf(temp, "Balance: $%.2f\n", balance);
+                        }
+                        validchoice = true;
+                    } else if (banking_choice == 2) {
+                        printf("Enter the amount you would like to deposit: ");
+                        scanf("%f", &amount);
+                        balance += amount;
+                        printf("Deposited %.2f. Your new balance is %.2f\n", amount, balance);
+                        balanceUpdated = true;
+                        fprintf(temp, "Balance: $%.2f\n", balance);
+                        validchoice = true; 
+                    } else if (banking_choice == 3) {
+                        puts("You have been logged out");
+                        exit(0);
+                    } else {
+                        while (banking_choice != 1 && banking_choice != 2 && banking_choice != 3){
+                            puts("Invalid input, try again");
+                            scanf("%d", &banking_choice);
+                        }   
+                    }  
+                }
             }
-            else
-            {
-                balance -= amount;
-                printf("Withdrawn %.2f. Your new balance is %.2f\n", amount, balance);
-            }
+        } else {
+            fputs(line, temp);
         }
-        fprintf(temp, "%s %s %.2f\n", fullname, fileUsername, balance); // Write all lines to temp file
+    }
+    if (balanceUpdated && banking_choice == 1){
+        fprintf(temp, "Withdrew %.2f, new balance is %.2f\n", amount, balance);
+    } else if(balanceUpdated && banking_choice == 2){
+        fprintf(temp, "Deposited %.2f, new balance is %.2f\n", amount, balance);
     }
 
-    fclose(file);
     fclose(temp);
 
-    if (!found)
-    {
-        puts("Your account information has not been added into our database");
-    }
-    else
-    {
+    if (balanceUpdated) {
         // Copy the temp file to the original file
-        file = fopen("Customers/customer_info.txt", "w");
-        temp = fopen("Customers/customer_info_temp.txt", "r");
+        file = fopen(filepath, "w");
+        temp = fopen("Temp_folder/withdrawal_balance.txt", "r");
 
-        while (fscanf(temp, "%s %s %f", fullname, fileUsername, &balance) != EOF)
-        {
-            fprintf(file, "%s %s %.2f\n", fullname, fileUsername, balance);
+        // Copy the content of the temporary file to the original file
+        while (fgets(line, sizeof(line), temp) != NULL) {
+            fputs(line, file);
         }
 
         fclose(file);
         fclose(temp);
     }
+    puts("End of transaction");
+    exit(0);
 }
 
 void admin_login() {
@@ -324,7 +349,7 @@ char* searchForUsername(char folderPath[], char username[]) {
 
 //invalid login option
 void user_login() {
-    char password[20], username[20], fileUsername[20], filePassword[20];
+    char password[20], username[20], fileUsername[20], filePassword[20], *foundFilename;
     bool found = false;
 
     FILE *file = fopen("Customers/clogins.txt", "r");
@@ -368,26 +393,23 @@ void user_login() {
   
     if (found){
         int choice; // User selection
-        char *foundFilename = searchForUsername("Customers", username);
+        foundFilename = searchForUsername("Customers", username);
 
         if (foundFilename != NULL) {
-        puts("Welcome! Please enter an integer value to represent your input.\n1. Withdraw  2. Deposit  3. View previous transactions  4. Logout");
+        puts("Welcome! Please enter an integer value to represent your input.\n1. Withdraw/Deposit  2. View previous transactions  3. Logout");
         // printf("Found username in file: %s\n", foundFilename); // Debugging
           do {
             if (scanf("%d", &choice) == 1) {
             // Process the choice
                 if (choice == 1) {
-                    user_withdrawing(foundFilename);
+                    user_banking(foundFilename);
                     break;
                 } else if (choice == 2) {
-                    puts("Depositing");
-                    exit(0);
-                } else if (choice == 3) {
                     puts("Viewing previous transactions");
                     exit(0);
-                } else if (choice == 4) {
-                    puts("You have been logged out");
-                    exit(0);
+                } else if (choice == 3) {
+                   puts("You have been logged out");
+                exit(0);
                 } else {
                 puts("Invalid input, try again");
                 }

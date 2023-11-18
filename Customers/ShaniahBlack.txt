@@ -4,6 +4,9 @@ Last Name: Black
 Username: shxniah
 Password: password
 
-Balance: $1000.00
+Balance: $510.00
 
 Transaction History: 
+Withdrew 400.00, new balance is 600.00
+Withdrew 50.00, new balance is 550.00
+Withdrew 40.00, new balance is 510.00
