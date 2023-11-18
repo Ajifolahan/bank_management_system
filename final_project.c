@@ -163,6 +163,7 @@ void user_withdrawing(char username[20]) {
     float balance = 0;
     bool found = false;
 
+    puts("Welcome to the Withdrawal section");
     while (fscanf(file, "%s %s %f", fullname, fileUsername, &balance) != EOF)
     {
         if (strcmp(username, fileUsername) == 0)

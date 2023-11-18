@@ -1,9 +1,0 @@
-First Name: Mo
-Last Name: Obanor
-
-Username: misticmo
-Password: dsanEA
-
-Balance: $2911.00
-
-Transaction History: 
