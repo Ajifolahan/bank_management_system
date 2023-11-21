@@ -12,6 +12,7 @@
 void user_login();
 void admin_login();
 void user_banking();
+void view_previous_transactions();
 
 int archive_customer(const char *filename)
 {
@@ -147,6 +148,41 @@ int view_customers()
     return 0;
 } // end of view customer
 
+void view_previous_transactions(char filename[200]){
+    char filepath[200], line[100];
+    snprintf(filepath, sizeof(filepath), "Customers/%s", filename);    // Use snprintf to concatenate the parameter to the file name
+    FILE *file = fopen(filepath, "r");
+
+     if (file == NULL) {
+        puts("Error opening file");
+        return;
+    }
+
+    bool transactionFound = false, notFound = true;
+
+    puts("Hello! Thank you for continually banking with us\n");
+
+    while (fgets(line, sizeof(line), file) != NULL) { 
+         if (transactionFound) {
+              if (strcmp(line, "\n") != 0) {
+                notFound = false; //assume its empty at first so notFound = true and if it isnt, then it is found
+            }
+            fputs(line, stdout);
+        } else if (strstr(line, "Transaction History:") != NULL) {
+            transactionFound = true;
+        }  
+    }
+
+    if (notFound) {
+        puts("At this time, you have no previous transactions with us.");
+    }
+
+    puts("\nThank you for banking with us. Have a great day!");
+    fclose(file);
+    exit(0);
+}
+
+
 void user_banking(char filename[200]) {
     char filepath[200], line[256];
     snprintf(filepath, sizeof(filepath), "Customers/%s", filename);    // Use snprintf to concatenate the parameter to the file name
@@ -156,10 +192,6 @@ void user_banking(char filename[200]) {
     if (file == NULL || temp == NULL)
     {
         puts("Error opening file");
-        if (file != NULL)
-            fclose(file);
-        if (temp != NULL)
-            fclose(temp);
         return;
     }
     float balance = 0;
@@ -232,7 +264,7 @@ void user_banking(char filename[200]) {
         fclose(file);
         fclose(temp);
     }
-    puts("End of transaction");
+    puts("End of transaction! have a great day");
     exit(0);
 }
 
@@ -405,8 +437,8 @@ void user_login() {
                     user_banking(foundFilename);
                     break;
                 } else if (choice == 2) {
-                    puts("Viewing previous transactions");
-                    exit(0);
+                    view_previous_transactions(foundFilename);
+                    break;
                 } else if (choice == 3) {
                    puts("You have been logged out");
                 exit(0);
