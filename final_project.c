@@ -13,6 +13,18 @@ void user_login();
 void admin_login();
 void user_banking();
 void view_previous_transactions();
+int generateAccountNumber()
+{
+    static int counter = 100000; // Start with 100000 as the initial account number
+    return counter++;
+}
+
+
+bool exit_option(const char* input) {
+    return strcmp(input, "exit") == 0;
+}
+
+
 
 int archive_customer(const char *filename)
 {
@@ -29,20 +41,33 @@ int archive_customer(const char *filename)
 
 int add_customer()
 {
-    char first[20], last[20], usern[20], pass[20], dob[20], acctnum[20], limit[20]; // shortened to initialize on one line
-    float deposit;
-    printf("Customer Registration\nCustomer First Name: "); // merged successive print statements
+    char first[20], last[20], usern[20], pass[20], dob[20]; // shortened to initialize on one line
+    float deposit, limit;
+    int temp = generateAccountNumber(), acctnum = temp + first[0] + last[0];
+
+    printf("Welcome to Customer Registration\n(Type 'exit' at anytime to cancel) Customer First Name: "); // merged successive print statements
     scanf("%s", first);
+        if(exit_option(first)){puts("Cancelled. Now exiting...\n"); return 0;}
+
     printf("Customer Last Name: ");
     scanf("%s", last);
+        if(exit_option(last)){puts("Cancelled. Now exiting...\n"); return 0;}
+
     printf("Date of Birth (MM/DD/YY): ");
     scanf("%s", dob);
+        if(exit_option(dob)){puts("Cancelled. Now exiting...\n"); return 0;}
+
     printf("Customer Username: ");
     scanf("%s", usern);
+        if(exit_option(usern)){puts("Cancelled. Now exiting...\n"); return 0;}
+
     printf("Customer Password: ");
     scanf("%s", pass);
+        if(exit_option(pass)){puts("Cancelled. Now exiting...\n"); return 0;}
+
     printf("Initial Deposit: ");
     scanf("%f", &deposit);
+    limit = deposit * 1.3;
 
     // checking for exisiting customer
     char check_path[200];
@@ -61,14 +86,14 @@ int add_customer()
     FILE *fpointer = fopen(file_path, "w"); // opening file (use a to append just in case of overwrite)
 
     // writing info in their file
-    fprintf(fpointer, "First Name: %s\nLast Name: %s\n\nUsername: %s\nPassword: %s\n\nBalance: $%.2f\n\nTransaction History: ", first, last, usern, pass, deposit);
+    fprintf(fpointer, "First Name: %s\nLast Name: %s\nDate of Birth: %s\n\nUsername: %s\nPassword: %s\n\nAccount Number: %06d\n\nBalance: $%.2f\n\nTransaction History:\nInitial depostit $%.2f, new balance: $%.2f ", first, last, dob, usern, pass, acctnum, deposit, deposit, deposit);
     fclose(fpointer);
 
     // Adding the username and passwords to login
     char append_path[200]; // I really don't understand why adding snprintf worked, but it did
-    snprintf(append_path, sizeof(append_path), "Customers/logins.txt");
+    snprintf(append_path, sizeof(append_path), "Customers/clogins.txt");
 
-    FILE *add_to_login = fopen("Customers/logins.txt", "a");
+    FILE *add_to_login = fopen("Customers/clogins.txt", "a");
     if (add_to_login == NULL)
     { // errorchecking
         printf("Error opening file logins.txt.\n");
@@ -78,6 +103,20 @@ int add_customer()
     fprintf(add_to_login, "\n%s %s", usern, pass);
     fclose(add_to_login); // add and close
 
+    // add to summary file
+    char append_path_summary[200]; // I really don't understand why adding snprintf worked, but it did
+    snprintf(append_path_summary, sizeof(append_path_summary), "Customers/summary.txt");
+
+    FILE *add_to_sum = fopen("Customers/summary.txt", "a");
+    if (add_to_sum == NULL)
+    { // errorchecking
+        printf("Error opening file summary.txt.\n");
+        return 1;
+    }
+
+    fprintf(add_to_sum, "\n%s %s %d\n", first, last, acctnum);
+    fclose(add_to_sum);
+    printf("\n%s %s has been added to database\n Going back to admin page...\n", first, last);
     return 0;
 }
 
@@ -145,7 +184,7 @@ int view_customers()
         }
     } while (action != 3);
 
-    return 0;
+    return 1;
 } // end of view customer
 
 void view_previous_transactions(char filename[200]){
@@ -314,16 +353,14 @@ void admin_login() {
             // Process the choice
                 if (choice == 1) {
                     view_customers();
-                    break;
                 } else if (choice == 2) {
                     add_customer();
-                    break;
                 } else if (choice == 3) {
                     puts("Sorting");
                     exit(0);
                 } else if (choice == 4) {
-                    puts("You have been logged out");
-                    exit(0);
+                    puts("You have been logged out\n\n");
+                    return;
                 } else {
                 puts("Invalid input, try again");
                 }
@@ -464,9 +501,9 @@ void user_login() {
 
 int main(void) { //,main menu
     int choice;   
-    puts("Welcome to MSM Bank (Please enter an integer value to represent your choice)\n1.User Portal  2.Admin Portal  3.Exit");
 
    do {
+    puts("Welcome to MSM Bank (Please enter an integer value to represent your choice)\n1.User Portal  2.Admin Portal  3.Exit");
         if (scanf("%d", &choice) == 1) {
             // Process the choice
             if (choice == 1) {
