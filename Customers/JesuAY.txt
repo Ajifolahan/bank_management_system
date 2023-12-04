@@ -1,0 +1,13 @@
+First Name: Jesu
+Last Name: AY
+Date of Birth: 11/11/11
+
+Username: hhyyy
+Password: 56789
+
+Account Number: 100120
+
+Balance: $500.00
+
+Transaction History:
+Initial depostit $500.00, new balance: $500.00 

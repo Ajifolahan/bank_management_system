@@ -308,7 +308,8 @@ void user_banking(char filename[200]) {
 }
 
 void admin_login() {
-    char password[20], username[20];   
+    char password[20], username[20], fileUsername[20], filePassword[20];
+    bool found = false;
     FILE *file = fopen("admins/alogins.txt", "r");
     if (file == NULL) {
         puts("Error opening file");
@@ -317,47 +318,53 @@ void admin_login() {
 
     puts("Welcome to the Admin portal. Please sign in: ");
 
-     do {
+    while (!found){
         printf("Username: ");
         scanf("%s", username);
+        if (strcmp(username, "exit") != 0) {
+            printf("Password: ");
+            scanf("%s", password);
+        }
         if (strcmp(username, "exit") == 0) {
+            puts("You have been exited from the bank");
             exit(0);
         }
         if (strstr(username, "-adm") == NULL) {
-            puts("Error. You cannot sign into the user portal with an admin login information. Please try again or type 'exit' to exit");
+            puts("Error. You cannot sign into the admin portal with a user login information. Please try again or type 'exit' to exit");
         }
-    } while (strstr(username, "-adm") == NULL);
-    printf("Password: ");
-    scanf("%s", password);
+    
 
-    char fileUsername[20], filePassword[20];
-    bool found = false;
-
-    while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
-        if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0) {
-                puts("Admin Login Successful");
-                found = true;
-                break;
+        // Read each line from the file and compare the login info
+        while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
+            if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0) {
+                    puts("Admin Login Successful");
+                    found = true;
+                    break;
+            }
         }
+    
+
+        if (!found && strstr(username, "-adm") != NULL) {
+            puts("Invalid login. Please try again or type 'exit' to exit");
+            fseek(file, 0, SEEK_SET); //return the file pointer to the beginning of the file
+        } 
     }
 
-    if (!found) {
-        puts("Invalid login. You've been exited from the bank");
-        exit(0);    
-    } else {
-        do {int choice;
+    if (found) {
+        int choice;
             puts("Please choose what you want to do today. Please enter an integer value to represent your choice.\n\n1. View Customer Info  2. Add Customers  3. Sort  4. Logout");
-
-        
+        do {
             if (scanf("%d", &choice) == 1) {
             // Process the choice
                 if (choice == 1) {
                     view_customers();
+                    break;
                 } else if (choice == 2) {
                     add_customer();
+                    break;
                 } else if (choice == 3) {
                     puts("Sorting");
-                    exit(0);
+                    break;
                 } else if (choice == 4) {
                     puts("You have been logged out\n\n");
                     return;
