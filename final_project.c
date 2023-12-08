@@ -14,11 +14,14 @@ void admin_login();
 void user_banking();
 void view_previous_transactions();
 void sorting();
+
+
 int generateAccountNumber()
 {
     static int counter = 100000; // Start with 100000 as the initial account number
     return counter++;
 }
+
 
 
 bool exit_option(const char* input) {
@@ -27,18 +30,17 @@ bool exit_option(const char* input) {
 
 
 
-int archive_customer(const char *filename)
+void archive_customer(const char *filename)
 {
     // search name of file
     // snprintf to concatinate any username to the file path so long as it exists
-    char newFile_path[200];
-    snprintf(newFile_path, sizeof(newFile_path), "Customers/archived customers/arc%s.txt", newFile_path);
-
-    int result = rename(filename, newFile_path);
-    result == 0 ? printf("Client successfully archived\n") : printf("Error archiving the client.\n");
-
-    return 0;
+     if (remove(filename) == 0)
+        printf("Client Successfully Archived\n");
+    else
+        printf("Unable to archive customer");
 }
+
+
 
 int add_customer()
 {
@@ -121,6 +123,8 @@ int add_customer()
     return 0;
 }
 
+
+
 int view_customers()
 {
     char customer[20], exitkey[5] = "exit"; // Customer search
@@ -167,11 +171,12 @@ int view_customers()
         case 2: // if they archive, make them verify; do while to prevent infinite loop
             do {
                 puts("Are you sure you want to archive this customer? 1. Yes  2. No");
-                scanf("%d", &arc);
+                scanf("%1d", &arc);
                 if (arc == 1) {
                     archive_customer(file_path);
+                     break;
                 } else if (arc == 2) {
-                    continue;
+                    break;
                 } else {
                     printf("Invalid input, please try again.\n");
                 }
@@ -187,6 +192,8 @@ int view_customers()
 
     return 1;
 } // end of view customer
+
+
 
 void view_previous_transactions(char filename[200]){
     char filepath[200], line[100];
@@ -222,19 +229,27 @@ void view_previous_transactions(char filename[200]){
     exit(0);
 }
 
+
+
 typedef struct { //structure for customers for sorting function
     char firstName[20];
     char lastName[20];
     char account[20];
 } Customer;
 
+
+
 int compareByFirstName(const void *a, const void *b) { // cast pointers to customer structs and use strcmp to compare first names
     return strcmp(((Customer *)a)->firstName, ((Customer *)b)->firstName);
 }
 
+
+
 int compareByAccount(const void *a, const void *b) { // cast pointers to customer structs and use strcmp to compare account numbers
     return strcmp(((Customer *)a)->account, ((Customer *)b)->account);
 }
+
+
 
 void sorting() { //function to sort customer info depending on sorting preference
     FILE *file = fopen("Customers/summary.txt", "r"); //open file
@@ -305,6 +320,8 @@ void sorting() { //function to sort customer info depending on sorting preferenc
     // close file
     fclose(file);
 }
+
+
 
 void user_banking(char filename[200]) {
     char filepath[200], line[256];
@@ -388,8 +405,10 @@ void user_banking(char filename[200]) {
         fclose(temp);
     }
     puts("End of transaction! have a great day");
-    exit(0);
+    return 0;
 }
+
+
 
 void admin_login() {
     char password[20], username[20], fileUsername[20], filePassword[20];
@@ -466,6 +485,8 @@ void admin_login() {
     fclose(file);
 }
 
+
+
 // Function to search for a username in a customer file
 char* searchForUsername(char folderPath[], char username[]) {
     DIR *dir;
@@ -506,6 +527,8 @@ char* searchForUsername(char folderPath[], char username[]) {
     }
     return foundFilename;
 }
+
+
 
 //invalid login option
 void user_login() {
@@ -589,6 +612,8 @@ void user_login() {
     }
     fclose(file);
 }
+
+
 
 int main(void) { //,main menu
     int choice;   

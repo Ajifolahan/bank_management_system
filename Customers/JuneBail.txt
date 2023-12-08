@@ -1,9 +1,0 @@
-First Name: June
-Last Name: Bail
-
-Username: jailbate
-Password: bates123
-
-Balance: $0.00
-
-Transaction History: 

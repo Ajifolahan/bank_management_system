@@ -1,9 +1,0 @@
-First Name: Momoreoluwa
-Last Name: Ayinde
-
-Username: Ajifolahan
-Password: password12345
-
-Balance: 413654.32
-
-Transaction History:
