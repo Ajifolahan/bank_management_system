@@ -30,14 +30,97 @@ bool exit_option(const char* input) {
 
 
 
-void archive_customer(const char *filename)
+void archive_customer(FILE *filename)
 {
-    // search name of file
-    // snprintf to concatinate any username to the file path so long as it exists
-     if (remove(filename) == 0)
-        printf("Client Successfully Archived\n");
-    else
-        printf("Unable to archive customer");
+char line[100];
+char name[40], last[20], username[20];
+
+rewind(filename);
+
+    while (fgets(line, sizeof(line), filename))
+    {
+        if (strstr(line, "First Name:") != NULL)
+        {
+            // Extract the account number from the line
+            sscanf(line, "First Name: %39s", name);
+        }
+
+        if (strstr(line, "Last Name:") != NULL)
+        {
+            sscanf(line, "Last Name: %19s", last);
+        }
+
+        if (strstr(line, "Username:") != NULL)
+        {
+            sscanf(line, "Username: %19s", username);
+            break;
+        }
+    }
+
+    //strcat(name, " ");
+    //strncat(name, last, sizeof(name) - strlen(name) - 1); //add the last name to name
+
+
+    FILE *remove_sum = fopen("Customers/summary.txt", "r"), *sum_cpy = fopen("Customers/summary_copy.txt", "w");
+    if (remove_sum == NULL || sum_cpy == NULL)
+    {
+        // Error checking
+        printf("Error opening file summary.txt or summary_copy.txt.\n");
+        return;
+    }
+
+    rewind(remove_sum);
+
+    while (fgets(line, sizeof(line), remove_sum) != NULL)
+    {
+        if (strstr(line, name) != NULL & strstr(line, last) != NULL)
+        {
+            continue;
+        }
+        else
+        {
+            line[strcspn(line, "\n")] = 0;
+            fputs(line, sum_cpy);
+        }
+    }
+
+
+    FILE *remove_clogins = fopen("Customers/clogins.txt", "r"), *clog_cpy = fopen("Customers/clogins_copy.txt", "w");  
+    if (remove_clogins == NULL || clog_cpy == NULL)
+    {
+        // Error checking
+        printf("Error opening file clogins.txt or clogins_copy.txt.\n");
+        return;
+    }
+
+    rewind(remove_clogins);
+
+    while (fgets(line, sizeof(line), remove_clogins) != NULL)
+    {
+        if (strstr(line, username) != NULL)
+        {
+            continue;
+        }
+        else 
+        {
+            line[strcspn(line, "\n")] = 0;
+            fputs(line, clog_cpy);
+        }
+    }
+
+
+    fclose(remove_sum);
+    fclose(sum_cpy);
+    fclose(remove_clogins);
+    fclose(clog_cpy);
+
+    remove("Customers/summary.txt");
+    remove("Customers/clogins.txt");
+    
+    rename("Customers/clogins_copy.txt", "Customers/clogins.txt");
+    rename("Customers/summary_copy.txt", "Customers/summary.txt");
+
+
 }
 
 
@@ -46,31 +129,57 @@ int add_customer()
 {
     char first[20], last[20], usern[20], pass[20], dob[20]; // shortened to initialize on one line
     float deposit, limit;
-    int temp = generateAccountNumber(), acctnum = temp + first[0] + last[0];
 
     printf("Welcome to Customer Registration\n(Type 'exit' at anytime to cancel) Customer First Name: "); // merged successive print statements
     scanf("%s", first);
-        if(exit_option(first)){puts("Cancelled. Now exiting...\n"); return 0;}
+        if(exit_option(first)){puts("Cancelled. Now exiting...\n"); return 1;}
 
     printf("Customer Last Name: ");
     scanf("%s", last);
-        if(exit_option(last)){puts("Cancelled. Now exiting...\n"); return 0;}
+        if(exit_option(last)){puts("Cancelled. Now exiting...\n"); return 1;}
 
     printf("Date of Birth (MM/DD/YY): ");
     scanf("%s", dob);
-        if(exit_option(dob)){puts("Cancelled. Now exiting...\n"); return 0;}
+        if(exit_option(dob)){puts("Cancelled. Now exiting...\n"); return 1;}
 
-    printf("Customer Username: ");
-    scanf("%s", usern);
-        if(exit_option(usern)){puts("Cancelled. Now exiting...\n"); return 0;}
+
+    char check_append_path[200]; // I really don't understand why adding snprintf worked, but it did
+    snprintf(check_append_path, sizeof(check_append_path), "Customers/clogins.txt");
+    FILE *check_in_log = fopen("Customers/clogins.txt", "r");
+    if (check_in_log == NULL)
+    { // errorchecking
+        printf("Error opening file clogins.txt.\n");
+        return 1;
+    }
+
+    char user_check[20] = "";
+        if(exit_option(usern)){puts("Cancelled. Now exiting...\n"); return 1;}
+
+        rewind(check_in_log);
+        while (fgets(user_check, 100, check_in_log))
+            {
+                printf("Customer Username: ");
+                scanf("%s", usern);
+                if (strstr(user_check, usern) != NULL)
+                { 
+                    puts("Username is already taken, please try again...\n");
+                    rewind(check_in_log);
+                } 
+                else {
+                        fclose(check_in_log);
+                        break;
+                     }       
+            }
 
     printf("Customer Password: ");
     scanf("%s", pass);
-        if(exit_option(pass)){puts("Cancelled. Now exiting...\n"); return 0;}
+        if(exit_option(pass)){puts("Cancelled. Now exiting...\n"); return 1;}
 
     printf("Initial Deposit: ");
     scanf("%f", &deposit);
     limit = deposit * 1.3;
+
+    int temp = generateAccountNumber(), acctnum = temp + first[0] + last[0]; // creating account number
 
     // checking for exisiting customer
     char check_path[200];
@@ -95,19 +204,18 @@ int add_customer()
     // Adding the username and passwords to login
     char append_path[200]; // I really don't understand why adding snprintf worked, but it did
     snprintf(append_path, sizeof(append_path), "Customers/clogins.txt");
-
     FILE *add_to_login = fopen("Customers/clogins.txt", "a");
     if (add_to_login == NULL)
-    { // errorchecking
-        printf("Error opening file logins.txt.\n");
-        return 1;
-    }
+        {
+            printf("Error opening clogins.txt");
+            return 0;
+        }
 
-    fprintf(add_to_login, "\n%s %s", usern, pass);
+    fprintf(add_to_login, "\n%s %s\n", usern, pass);
     fclose(add_to_login); // add and close
 
     // add to summary file
-    char append_path_summary[200]; // I really don't understand why adding snprintf worked, but it did
+    char append_path_summary[200];
     snprintf(append_path_summary, sizeof(append_path_summary), "Customers/summary.txt");
 
     FILE *add_to_sum = fopen("Customers/summary.txt", "a");
@@ -117,18 +225,30 @@ int add_customer()
         return 1;
     }
 
-    fprintf(add_to_sum, "\n%s %s %d\n", first, last, acctnum);
+    fprintf(add_to_sum, "\n%-20s %-20s %06d\n", first, last, acctnum);
     fclose(add_to_sum);
-    printf("\n%s %s has been added to database\n Going back to admin page...\n", first, last);
+    printf("\n%s %s has been added to the database\n Going back to admin page...\n", first, last);
     return 0;
 }
 
 
 
 int view_customers()
-{
+{   
+
+    char client[100];
+    FILE *client_list = fopen("Customers/summary.txt", "r");
+
+    printf("\n\n%-20s %-20s %-20s\n", "First Name", "Last Name", "Account Number");
+    printf("-------------------------------------------------------------\n");
+    while(fgets(client, 1000, client_list))
+        {
+            printf("%s", client);
+        }
+    fclose(client_list);
+
     char customer[20], exitkey[5] = "exit"; // Customer search
-    printf("Please enter Customer's first and last name with NO space between\n(type 'exit' to return to admin page): ");
+    printf("\nPlease enter Customer's first and last name with NO space between\n(type 'exit' to return to admin page): ");
     scanf("%s", customer);
     if (strcmp("exit", customer) == 0)
     {
@@ -155,8 +275,6 @@ int view_customers()
         printf("%s", data);
     }
 
-    fclose(fpointer); // close the file
-
     // admin action choices
     int action;
     do {
@@ -170,10 +288,11 @@ int view_customers()
             break;
         case 2: // if they archive, make them verify; do while to prevent infinite loop
             do {
-                puts("Are you sure you want to archive this customer? 1. Yes  2. No");
+                puts("Are you sure you want to archive this Client? 1. Yes  2. No");
                 scanf("%1d", &arc);
                 if (arc == 1) {
-                    archive_customer(file_path);
+                    archive_customer(fpointer);
+                    remove(file_path) == 0 ? printf("\nClient Successfully Archived\n") : printf("\nError Archiving Client\n");
                      break;
                 } else if (arc == 2) {
                     break;
@@ -185,10 +304,11 @@ int view_customers()
             return 0;
             break;
         default:
-            puts("Invalid Input");
-            break;
+            puts("Invalid input, please try again");
         }
     } while (action != 3);
+
+    fclose(fpointer); // close the file
 
     return 1;
 } // end of view customer
@@ -405,7 +525,7 @@ void user_banking(char filename[200]) {
         fclose(temp);
     }
     puts("End of transaction! have a great day");
-    return 0;
+    return;
 }
 
 
@@ -455,19 +575,19 @@ void admin_login() {
 
     if (found) {
         int choice;
-            puts("Please choose what you want to do today. Please enter an integer value to represent your choice.\n\n1. View Customer Info  2. Add Customers  3. Sort  4. Logout");
-        do {
+        while (choice != 4){puts("\nPlease choose what you want to do today. Please enter an integer value to represent your choice.\n\n1. View Customer Info  2. Add Customers  3. Sort  4. Logout");
+        
             if (scanf("%d", &choice) == 1) {
             // Process the choice
                 if (choice == 1) {
                     view_customers();
-                    break;
+                    
                 } else if (choice == 2) {
                     add_customer();
-                    break;
+                    
                 } else if (choice == 3) {
                     sorting();
-                    break;
+                    
                 } else if (choice == 4) {
                     puts("You have been logged out\n\n");
                     return;
@@ -480,7 +600,7 @@ void admin_login() {
             puts("Invalid input, try again");
             while ((c = getchar()) != '\n' && c != EOF);
             }
-        } while (1);
+        }
     }
     fclose(file);
 }

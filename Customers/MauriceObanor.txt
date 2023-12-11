@@ -1,13 +1,13 @@
 First Name: Maurice
 Last Name: Obanor
-Date of Birth: 01/10/03
+Date of Birth: 01/10/2003
 
 Username: mo587
 Password: password
 
-Account Number: 099930
+Account Number: 099929
 
-Balance: $20300.00
+Balance: $12345.00
 
 Transaction History:
-Initial depostit $20300.00, new balance: $20300.00 
+Initial depostit $12345.00, new balance: $12345.00 
