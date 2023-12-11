@@ -73,14 +73,13 @@ rewind(filename);
 
     while (fgets(line, sizeof(line), remove_sum) != NULL)
     {
-        if (strstr(line, name) != NULL & strstr(line, last) != NULL)
+        if (strstr(line, name) != NULL && strstr(line, last) != NULL)
         {
             continue;
         }
         else
         {
-            line[strcspn(line, "\n")] = 0;
-            fputs(line, sum_cpy);
+            fprintf(sum_cpy, "%s", line);
         }
     }
 
@@ -103,8 +102,7 @@ rewind(filename);
         }
         else 
         {
-            line[strcspn(line, "\n")] = 0;
-            fputs(line, clog_cpy);
+            fprintf(clog_cpy, "%s", line);
         }
     }
 
@@ -211,7 +209,7 @@ int add_customer()
             return 0;
         }
 
-    fprintf(add_to_login, "\n%s %s\n", usern, pass);
+    fprintf(add_to_login, "%s %s\n", usern, pass);
     fclose(add_to_login); // add and close
 
     // add to summary file
@@ -225,7 +223,7 @@ int add_customer()
         return 1;
     }
 
-    fprintf(add_to_sum, "\n%-20s %-20s %06d\n", first, last, acctnum);
+    fprintf(add_to_sum, "%-20s %-20s %06d\n", first, last, acctnum);
     fclose(add_to_sum);
     printf("\n%s %s has been added to the database\n Going back to admin page...\n", first, last);
     return 0;
@@ -243,11 +241,12 @@ int view_customers()
     printf("-------------------------------------------------------------\n");
     while(fgets(client, 1000, client_list))
         {
-            printf("%s", client);
+            printf("%s\n", client);
         }
     fclose(client_list);
 
     char customer[20], exitkey[5] = "exit"; // Customer search
+    int isClient = 0;
     printf("\nPlease enter Customer's first and last name with NO space between\n(type 'exit' to return to admin page): ");
     scanf("%s", customer);
     if (strcmp("exit", customer) == 0)
@@ -266,7 +265,8 @@ int view_customers()
 
     // check if exists
     if (fpointer == NULL) {
-        printf("Customer does not exist. Please check your spelling and try again.\n");
+        printf("\nCustomer does not exist. Please check your spelling and try again.\n Returning to admin page...");
+        return 0;
     }
 
     // output user info
@@ -278,37 +278,35 @@ int view_customers()
     // admin action choices
     int action;
     do {
-        printf("\nActions:  1. Edit Client Information  2. Archive Client  3. Back\n"); // ask admin what they want to do with the user
+        printf("\nActions: 1. Archive Client  2. Back\n"); // ask admin what they want to do with the user
         scanf("%d", &action);
 
         int arc; // for archive warning
         switch (action) {
-        case 1:
-            puts("Editing Client");
-            break;
-        case 2: // if they archive, make them verify; do while to prevent infinite loop
+        case 1: // if they archive, make them verify; do while to prevent infinite loop
             do {
                 puts("Are you sure you want to archive this Client? 1. Yes  2. No");
                 scanf("%1d", &arc);
                 if (arc == 1) {
                     archive_customer(fpointer);
+                    fclose(fpointer);
                     remove(file_path) == 0 ? printf("\nClient Successfully Archived\n") : printf("\nError Archiving Client\n");
-                     break;
+                    break;
                 } else if (arc == 2) {
                     break;
                 } else {
                     printf("Invalid input, please try again.\n");
                 }
             } while (arc != 1 && arc != 2);
-        case 3:
+        case 2:
             return 0;
             break;
         default:
             puts("Invalid input, please try again");
         }
-    } while (action != 3);
+    } while (action != 2);
 
-    fclose(fpointer); // close the file
+     // close the file
 
     return 1;
 } // end of view customer
@@ -420,7 +418,7 @@ void sorting() { //function to sort customer info depending on sorting preferenc
         printf("%-20s %-20s %-20s\n", "First Name", "Last Name", "Account Number");
         printf("-------------------------------------------------------------\n");
         for (int i = 0; i < numCustomers; i++) {
-            printf("%-20s %-20s %-20s\n", customers[i].firstName, customers[i].lastName, customers[i].account);
+            printf("%-20s %-20s %-20s\n\n", customers[i].firstName, customers[i].lastName, customers[i].account);
         } printf("\n");
 
     } else if (sortBy == 2) { //prints out "sort by account number"
@@ -429,7 +427,7 @@ void sorting() { //function to sort customer info depending on sorting preferenc
         printf("%-20s %-20s %-20s\n", "First Name", "Last Name", "Account Number");
         printf("-------------------------------------------------------------\n");
         for (int i = 0; i < numCustomers; i++) {
-            printf("%-20s %-20s %-20s\n", customers[i].firstName, customers[i].lastName, customers[i].account);
+            printf("%-20s %-20s %-20s\n\n", customers[i].firstName, customers[i].lastName, customers[i].account);
         } printf("\n");
     } else {
         printf("Invalid sort option\n"); //check if option typed is invalid

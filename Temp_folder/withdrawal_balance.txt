@@ -1,14 +1,17 @@
-First Name: Jane
-Last Name: Doe
-Date of Birth: 11/11/11
+First Name: Maurice
+Last Name: Obanor
+Date of Birth: 01/10/2003
 
-Username: janeie
-Password: 8888
+Username: mo587
+Password: password
 
-Account Number: 100142
+Account Number: 099929
 
-Balance: $5400.00
+Balance: $12095.00
 
 Transaction History:
-Initial depostit $5000.00, new balance: $5000.00
-Deposited 400.00, new balance is 5400.00
+Initial depostit $12345.00, new balance: $12345.00
+Withdrew 200.00, new balance is 12145.00
+Withdrew 200.00, new balance is 11945.00
+Deposited 100.00, new balance is 12045.00
+Deposited 50.00, new balance is 12095.00
