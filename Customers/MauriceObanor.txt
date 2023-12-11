@@ -7,7 +7,8 @@ Password: password
 
 Account Number: 099929
 
-Balance: $12345.00
+Balance: $11945.00
 
 Transaction History:
-Initial depostit $12345.00, new balance: $12345.00 
+Initial depostit $12345.00, new balance: $12345.00 Withdrew 200.00, new balance is 12145.00
+Withdrew 200.00, new balance is 11945.00

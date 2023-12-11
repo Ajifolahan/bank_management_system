@@ -198,7 +198,7 @@ int add_customer()
     FILE *fpointer = fopen(file_path, "w"); // opening file (use a to append just in case of overwrite)
 
     // writing info in their file
-    fprintf(fpointer, "First Name: %s\nLast Name: %s\nDate of Birth: %s\n\nUsername: %s\nPassword: %s\n\nAccount Number: %06d\n\nBalance: $%.2f\n\nTransaction History:\nInitial depostit $%.2f, new balance: $%.2f ", first, last, dob, usern, pass, acctnum, deposit, deposit, deposit);
+    fprintf(fpointer, "First Name: %s\nLast Name: %s\nDate of Birth: %s\n\nUsername: %s\nPassword: %s\n\nAccount Number: %06d\n\nBalance: $%.2f\n\nTransaction History:\nInitial depostit $%.2f, new balance: $%.2f\n", first, last, dob, usern, pass, acctnum, deposit, deposit, deposit);
     fclose(fpointer);
 
     // Adding the username and passwords to login
@@ -472,7 +472,7 @@ void user_banking(char filename[200]) {
                         scanf("%f", &amount);
                         if (amount > balance) {
                             printf("Insufficient balance. Your current balance is %.2f\n", balance);
-                            exit(0);
+                            return;
                         } else {
                             balance -= amount;
                             printf("Withdrawn %.2f. Your new balance is %.2f\n", amount, balance);
@@ -490,7 +490,7 @@ void user_banking(char filename[200]) {
                         validchoice = true; 
                     } else if (banking_choice == 3) {
                         puts("You have been logged out");
-                        exit(0);
+                        return;
                     } else {
                         while (banking_choice != 1 && banking_choice != 2 && banking_choice != 3){
                             puts("Invalid input, try again");
@@ -525,7 +525,7 @@ void user_banking(char filename[200]) {
         fclose(temp);
     }
     puts("End of transaction! have a great day");
-    return;
+    return; 
 }
 
 
@@ -628,7 +628,7 @@ char* searchForUsername(char folderPath[], char username[]) {
                 while (fgets(line, sizeof(line), file) != NULL) {
                     lineCount++;
                     // Check if the line contains "Username:" followed by the target username
-                    if (lineCount == 4 && strstr(line, "Username:") != NULL && strstr(line, username) != NULL) {
+                    if (lineCount == 5 && strstr(line, "Username: ") != NULL && strstr(line, username) != NULL) {
                         fclose(file);
                         closedir(dir);
                         // Allocate memory for the filename

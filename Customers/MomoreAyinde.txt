@@ -1,0 +1,13 @@
+First Name: Momore
+Last Name: Ayinde
+Date of Birth: 01/06/2004
+
+Username: momore
+Password: 12345
+
+Account Number: 100142
+
+Balance: $600.00
+
+Transaction History:
+Initial depostit $600.00, new balance: $600.00 
