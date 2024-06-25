@@ -1,0 +1,30 @@
+FULL STACK BANK MANAGEMENT PROJECT
+
+How to run:
+    - Make sure to have php installed and somewhat familiar
+    - Navigate to Project folder(Bank Management)
+    - Open terminal and run 'php -S localhost:8000 -t public' ----> Not sure if it's universal, as I'm on Mac
+    - There will be a message if successful saying:
+                '[Mon Jun 24 17:11:34 2024] PHP 8.3.8 Development Server (http://localhost:8000) started' or someting similar
+                if not, make sure to troubleshoot
+    - Click on the link and test the form submission
+    - To test the account number generator:
+        First navigate to /backend/numGen in the terminal
+        run 'make'
+        then run './run'
+    Fixes:
+        - Updated client structure with correct needed info
+        - Created temporary HTML form page to test form submissions
+        - Created PGQL relation template
+        - Cleaned out functions & codes
+        - Openssl header issue for acct num encryption
+    Done:
+        - Build Acct num generator with assured randomness & security
+    To-do:
+        - Front-end Development(Web-D/UI/UX)
+    In progress:
+        - Web server connection
+        - Form Submission
+        - Postgres implementation
+        
+        
